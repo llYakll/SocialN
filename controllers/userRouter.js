@@ -20,7 +20,7 @@ user.get('/', (req, res) => {
     .catch(err => res.status(500).json(err));
 });
 
-// get a single user by ID *works
+// get a single user by ID *works 
 //  http://localhost:3000/api/users/662d7e84e9655ca7e70dffdc <--your actual _id will be different.
 user.get('/:id', (req, res) => {
   User.findById(req.params.id).populate('thoughts friends')

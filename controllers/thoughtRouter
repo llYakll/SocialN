@@ -70,7 +70,7 @@ thought.delete('/:id', (req, res) => {
     .catch(err => res.status(500).json(err));
 });
 
-// add a reaction to a thought 
+// add a reaction to a thought *works
 thought.post('/:thoughtId/reactions', (req, res) => {
   Thought.findByIdAndUpdate(
     req.params.thoughtId,
@@ -81,7 +81,7 @@ thought.post('/:thoughtId/reactions', (req, res) => {
     .catch(err => res.status(400).json(err));
 });
 
-// remove a reaction from a thought
+// remove a reaction from a thought *works
 thought.delete('/:thoughtId/reactions/:reactionId', (req, res) => {
   Thought.findByIdAndUpdate(
     req.params.thoughtId,
