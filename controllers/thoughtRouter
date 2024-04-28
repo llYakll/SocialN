@@ -1,0 +1,95 @@
+const express = require('express');
+const Thought = require('../models/thoughtSchema');
+const User = require('../models/User');
+const thought = express.Router();
+
+// get all thoughts *works
+// http://localhost:3000/api/thoughts
+thought.get('/', (req, res) => {
+  Thought.find().populate('reactions')
+    .then(thoughts => res.json(thoughts))
+    .catch(err => res.status(500).json(err));
+});
+
+// get a single thought by ID *works
+// http://localhost:3000/api/thoughts
+thought.get('/:id', (req, res) => {
+  Thought.findById(req.params.id).populate('reactions')
+    .then(thought => {
+      if (!thought) {
+        return res.status(404).json({ message: 'Thought not found' });
+      }
+      res.json(thought);
+    })
+    .catch(err => res.status(500).json(err));
+});
+
+// create a new thought and push it to the users thoughts *works
+// http://localhost:3000/api/thoughts
+/*
+{
+  "thoughtText": "This is a new thought.",
+  "username": "generic_user",
+  "userId": "662d7e84e9655ca7e70dffdc"
+}
+*/
+thought.post('/', (req, res) => {
+  Thought.create(req.body)
+    .then(thought => {
+      return User.findByIdAndUpdate(
+        req.body.userId,
+        { $push: { thoughts: thought._id } },
+        { new: true }
+      );
+    })
+    .then(user => res.status(201).json(user))
+    .catch(err => res.status(400).json(err));
+});
+
+// update a thought by ID *works
+thought.put('/:id', (req, res) => {
+  Thought.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    .then(thought => {
+      if (!thought) {
+        return res.status(404).json({ message: 'Thought not found' });
+      }
+      res.json(thought);
+    })
+    .catch(err => res.status(400).json(err));
+});
+
+// delete a thought by ID *works
+thought.delete('/:id', (req, res) => {
+  Thought.findByIdAndDelete(req.params.id)
+    .then(thought => {
+      if (!thought) {
+        return res.status(404).json({ message: 'Thought not found' });
+      }
+      res.status(200).json({ message: 'Thought deleted' });
+    })
+    .catch(err => res.status(500).json(err));
+});
+
+// add a reaction to a thought 
+thought.post('/:thoughtId/reactions', (req, res) => {
+  Thought.findByIdAndUpdate(
+    req.params.thoughtId,
+    { $push: { reactions: req.body } },
+    { new: true }
+  )
+    .then(thought => res.json(thought))
+    .catch(err => res.status(400).json(err));
+});
+
+// remove a reaction from a thought
+thought.delete('/:thoughtId/reactions/:reactionId', (req, res) => {
+  Thought.findByIdAndUpdate(
+    req.params.thoughtId,
+    { $pull: { reactions: { reactionId: req.params.reactionId } } },
+    { new: true }
+  )
+    .then(thought => res.json(thought))
+    .catch(err => res.status(400).json(err));
+});
+
+module.exports = thought;
