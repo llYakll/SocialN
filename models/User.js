@@ -14,7 +14,7 @@ userSchema.virtual('friendCount').get(function() {
 });
 
 
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function(next) { //Acts like a hook
   try {
     if (!this.isModified('password')) {
       return next();
